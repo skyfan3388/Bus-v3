@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>巴士到站提示器</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f2f2f2;
+    padding:20px;
+}
+
+.container{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+input,select{
+    padding:10px;
+    font-size:16px;
+}
+
+button{
+    padding:10px 16px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.card{
+    background:white;
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:15px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative;
+    overflow:hidden;
+    transition:0.3s;
+}
+
+.route-box{
+    background:#2c2f36;
+    color:white;
+    font-size:36px;
+    font-weight:bold;
+    padding:18px 28px;
+    border-radius:16px;
+    min-width:90px;
+    text-align:center;
+}
+
+.eta-main{font-size:26px;font-weight:bold;}
+.eta-sub{margin-top:4px;color:#666;}
+.stop-name{width:160px;font-weight:bold;}
+.message{width:150px;font-weight:bold;}
+
+.red{color:#e53935;}
+.orange{color:#fb8c00;}
+.green{color:#2e7d32;}
+.black{color:#333;}
+
+.flash{animation:flash 1s infinite;}
+@keyframes flash{
+    0%{opacity:1;}
+    50%{opacity:0.4;}
+    100%{opacity:1;}
+}
+
+.delete-indicator{
+    position:absolute;
+    right:-80px;
+    top:0;
+    bottom:0;
+    width:80px;
+    background:red;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<h2>巴士到站提示器</h2>
+
+<!-- p1 -->
+<div class="container">
+    <input id="routeInput" placeholder="巴士號碼">
+    <select id="destinationSelect">
+        <option>請輸入路線</option>
+    </select>
+    <select id="stopSelect">
+        <option>請選擇車站</option>
+    </select>
+    <button onclick="addBus()">+</button>
+</div>
+
+<!-- p2 -->
+<div id="busList"></div>
+
+<script>
+
+let buses=[];
+let debounceTimer;
+
+const routeInput=document.getElementById("routeInput");
+const destinationSelect=document.getElementById("destinationSelect");
+const stopSelect=document.getElementById("stopSelect");
+
+routeInput.addEventListener("input",()=>{
+    clearTimeout(debounceTimer);
+    debounceTimer=setTimeout(loadRoute,500);
+});
+
+destinationSelect.addEventListener("change",loadStops);
+
+/* ====== 載入路線 ====== */
+async function loadRoute(){
+    const route=routeInput.value.trim().toUpperCase();
+    if(!route) return;
+
+    destinationSelect.innerHTML="<option>載入中...</option>";
+    stopSelect.innerHTML="<option>請選擇車站</option>";
+
+    const res=await fetch("https://data.etabus.gov.hk/v1/transport/kmb/route/");
+    const data=await res.json();
+    const matched=data.data.filter(r=>r.route===route);
+
+    destinationSelect.innerHTML="";
+    matched.sort((a,b)=>parseInt(a.service_type)-parseInt(b.service_type));
+
+    matched.forEach(r=>{
+        let label=r.dest_tc;
+        if(r.service_type==="2") label+=" [特別班次]";
+        if(r.service_type==="3") label+=" [繁忙時間限定]";
+        if(parseInt(r.service_type)>=4) label+=" [特別服務]";
+
+        const opt=document.createElement("option");
+        opt.value=`${r.bound}|${r.service_type}|${r.dest_tc}`;
+        opt.textContent=label;
+        destinationSelect.appendChild(opt);
+    });
+
+    loadStops();
+}
+
+/* ====== 載入站 ====== */
+async function loadStops(){
+    const route=routeInput.value.trim().toUpperCase();
+    const val=destinationSelect.value;
+    if(!route||!val) return;
+
+    stopSelect.innerHTML="<option>載入站點...</option>";
+
+    const [bound,serviceType]=val.split("|");
+    const boundText=bound==="O"?"outbound":"inbound";
+
+    const res=await fetch(
+        `https://data.etabus.gov.hk/v1/transport/kmb/route-stop/${route}/${boundText}/${serviceType}`
+    );
+    const data=await res.json();
+
+    const stops=data.data.sort((a,b)=>a.seq-b.seq);
+
+    stopSelect.innerHTML="";
+    for(const s of stops){
+        const stopRes=await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop/${s.stop}`);
+        const stopData=await stopRes.json();
+        const opt=document.createElement("option");
+        opt.value=`${s.stop}|${serviceType}`;
+        opt.textContent=stopData.data.name_tc;
+        stopSelect.appendChild(opt);
+    }
+}
+
+/* ====== 新增 ====== */
+function addBus(){
+    const route=routeInput.value.trim().toUpperCase();
+    const destVal=destinationSelect.value;
+    const stopVal=stopSelect.value;
+    if(!route||!destVal||!stopVal) return alert("請選擇完整資料");
+
+    const [stopId,serviceType]=stopVal.split("|");
+    const stopName=stopSelect.options[stopSelect.selectedIndex].text;
+
+    buses.push({route,stopId,serviceType,stopName});
+    render();
+}
+
+/* ====== ETA ====== */
+async function fetchETA(stop,route,serviceType){
+    const res=await fetch(
+        `https://data.etabus.gov.hk/v1/transport/kmb/eta/${stop}/${route}/${serviceType}`
+    );
+    const data=await res.json();
+    return data.data.slice(0,2);
+}
+
+function getMinutes(eta){
+    const now=new Date();
+    return Math.max(0,Math.round((new Date(eta)-now)/60000));
+}
+
+function getStatus(min){
+    if(min<=1) return ["唔好玩電話😡","red flash"];
+    if(min<=4) return ["準備上車","orange"];
+    if(min<=9) return ["可以慢慢行","green"];
+    return ["仲有排等","black"];
+}
+
+/* ====== Render ====== */
+async function render(){
+    const list=document.getElementById("busList");
+    list.innerHTML="";
+
+    for(let i=0;i<buses.length;i++){
+        const b=buses[i];
+        const etaData=await fetchETA(b.stopId,b.route,b.serviceType);
+
+        let first="--",second="--",msg="暫時無班次",cls="black";
+
+        if(etaData.length>0){
+            const m1=getMinutes(etaData[0].eta);
+            first=m1+" 分鐘";
+            [msg,cls]=getStatus(m1);
+
+            if(etaData.length>1){
+                const m2=getMinutes(etaData[1].eta);
+                second=m2+" 分鐘";
+            }
+        }
+
+        const card=document.createElement("div");
+        card.className="card";
+        card.innerHTML=`
+            <div class="route-box">${b.route}</div>
+            <div>
+                <div class="eta-main ${cls}">${first}</div>
+                <div class="eta-sub">${second}</div>
+            </div>
+            <div class="stop-name">${b.stopName}</div>
+            <div class="message ${cls}">${msg}</div>
+            <div class="delete-indicator">刪除</div>
+        `;
+
+        enableSwipe(card,i);
+        list.appendChild(card);
+    }
+}
+
+function enableSwipe(card,index){
+    let startX=0,currentX=0;
+
+    card.addEventListener("touchstart",e=>{
+        startX=e.touches[0].clientX;
+    });
+
+    card.addEventListener("touchmove",e=>{
+        currentX=e.touches[0].clientX;
+        if(currentX-startX<-50){
+            card.style.transform="translateX(-80px)";
+        }
+    });
+
+    card.addEventListener("touchend",()=>{
+        if(currentX-startX<-100){
+            buses.splice(index,1);
+            render();
+        }else{
+            card.style.transform="translateX(0)";
+        }
+    });
+}
+
+setInterval(render,30000);
+
+</script>
+</body>
+</html>

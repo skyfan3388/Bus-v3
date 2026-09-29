@@ -1,286 +1,1196 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>巴士到站提示器</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kasha Photography｜攝影作品集</title>
+  <meta name="description" content="Kasha 攝影作品展示網站，呈現人像、街拍、品牌與故事感攝影風格，適合個人品牌與預約合作使用。" />
+  <style>
+    :root {
+      --bg: #111111;
+      --bg-soft: #181818;
+      --card: rgba(255,255,255,0.04);
+      --line: rgba(255,255,255,0.1);
+      --text: #f4efe7;
+      --muted: #b8b1a8;
+      --accent: #c8a97e;
+      --accent-2: #8d6b45;
+      --white: #ffffff;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --max-width: 1200px;
+    }
 
-<style>
-body{
-    font-family:Arial;
-    background:#f2f2f2;
-    padding:20px;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-.container{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
-}
+    html {
+      scroll-behavior: smooth;
+    }
 
-input,select{
-    padding:10px;
-    font-size:16px;
-}
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(200, 169, 126, 0.18), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(141, 107, 69, 0.14), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
 
-button{
-    padding:10px 16px;
-    font-size:18px;
-    cursor:pointer;
-}
+    img {
+      max-width: 100%;
+      display: block;
+    }
 
-.card{
-    background:white;
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:15px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    position:relative;
-    overflow:hidden;
-    transition:0.3s;
-}
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-.route-box{
-    background:#2c2f36;
-    color:white;
-    font-size:36px;
-    font-weight:bold;
-    padding:18px 28px;
-    border-radius:16px;
-    min-width:90px;
-    text-align:center;
-}
+    button {
+      font: inherit;
+    }
 
-.eta-main{font-size:26px;font-weight:bold;}
-.eta-sub{margin-top:4px;color:#666;}
-.stop-name{width:160px;font-weight:bold;}
-.message{width:150px;font-weight:bold;}
+    .container {
+      width: min(var(--max-width), calc(100% - 32px));
+      margin: 0 auto;
+    }
 
-.red{color:#e53935;}
-.orange{color:#fb8c00;}
-.green{color:#2e7d32;}
-.black{color:#333;}
+    .section {
+      padding: 88px 0;
+    }
 
-.flash{animation:flash 1s infinite;}
-@keyframes flash{
-    0%{opacity:1;}
-    50%{opacity:0.4;}
-    100%{opacity:1;}
-}
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent);
+      font-size: 0.9rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
 
-.delete-indicator{
-    position:absolute;
-    right:-80px;
-    top:0;
-    bottom:0;
-    width:80px;
-    background:red;
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-}
-</style>
+    .eyebrow::before {
+      content: "";
+      width: 34px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.8;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 6rem);
+      line-height: 0.96;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 4vw, 3.3rem);
+      line-height: 1.1;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 32px;
+      align-items: end;
+      margin-bottom: 36px;
+    }
+
+    .section-head p {
+      max-width: 540px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50px;
+      padding: 0 22px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      transition: 0.25s ease;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #e1c299);
+      color: #171717;
+      box-shadow: 0 14px 30px rgba(200, 169, 126, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(200, 169, 126, 0.32);
+    }
+
+    .btn-secondary {
+      border-color: var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* NAV */
+    .nav-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(17,17,17,0.7);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .nav {
+      min-height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand strong {
+      font-family: Georgia, serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.06em;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 0.86rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      font-size: 0.96rem;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--white);
+    }
+
+    .menu-toggle {
+      display: none;
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--line);
+      background: transparent;
+      border-radius: 12px;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    /* HERO */
+    .hero {
+      padding: 56px 0 72px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.02fr 0.98fr;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .hero-copy p {
+      max-width: 620px;
+      font-size: 1.06rem;
+    }
+
+    .hero-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      min-height: 560px;
+    }
+
+    .hero-photo {
+      height: 100%;
+      min-height: 520px;
+      border-radius: 22px;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(17,17,17,0.05), rgba(17,17,17,0.65)),
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,0.16), transparent 24%),
+        radial-gradient(circle at 80% 18%, rgba(200,169,126,0.22), transparent 28%),
+        linear-gradient(135deg, #3a322b 0%, #1a1a1a 45%, #0e0e0e 100%);
+    }
+
+    .hero-photo::before,
+    .hero-photo::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .hero-photo::before {
+      width: 240px;
+      height: 240px;
+      top: 50px;
+      right: -40px;
+    }
+
+    .hero-photo::after {
+      width: 120px;
+      height: 120px;
+      left: 30px;
+      bottom: 70px;
+    }
+
+    .photo-badge {
+      position: absolute;
+      left: 24px;
+      bottom: 24px;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 14px 16px;
+      background: rgba(9,9,9,0.52);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .photo-badge strong {
+      font-size: 1rem;
+    }
+
+    .photo-badge span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 26px;
+    }
+
+    .stat {
+      padding: 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .stat strong {
+      display: block;
+      font-family: Georgia, serif;
+      font-size: 1.7rem;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    /* FEATURED CARDS */
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+
+    .feature-card {
+      grid-column: span 4;
+      min-height: 440px;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: #1c1c1c;
+      box-shadow: var(--shadow);
+      transition: transform 0.28s ease, border-color 0.28s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(200,169,126,0.45);
+    }
+
+    .feature-visual {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.15) 46%, rgba(0,0,0,0.02)),
+        var(--bg-image);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .feature-info {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 24px;
+      z-index: 1;
+    }
+
+    .tag {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      color: #efe5d7;
+      font-size: 0.82rem;
+      margin-bottom: 12px;
+    }
+
+    /* FILTERS + GALLERY */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .filter-btn {
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      color: #141414;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+
+    .gallery-item {
+      grid-column: span 4;
+      min-height: 320px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .gallery-item.large {
+      grid-column: span 8;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-5px);
+    }
+
+    .gallery-item.hidden {
+      display: none;
+    }
+
+    .gallery-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.58)),
+        var(--bg-image);
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.45s ease;
+    }
+
+    .gallery-item:hover .gallery-bg {
+      transform: scale(1.04);
+    }
+
+    .gallery-meta {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      z-index: 1;
+    }
+
+    .gallery-meta h3 {
+      margin-bottom: 6px;
+      font-size: 1.2rem;
+    }
+
+    .gallery-meta span {
+      color: #e8ddd1;
+      font-size: 0.9rem;
+    }
+
+    .plus {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 1.2rem;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+
+    /* ABOUT / PROCESS / TESTIMONIAL */
+    .two-col {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 26px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 28px;
+    }
+
+    .signature-box {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(180deg, rgba(200,169,126,0.08), rgba(255,255,255,0.02)),
+        rgba(255,255,255,0.02);
+    }
+
+    .quote {
+      font-size: 1.35rem;
+      line-height: 1.5;
+      color: var(--text);
+      font-family: Georgia, serif;
+    }
+
+    .mini {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .process-grid,
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .process-card,
+    .testimonial-card {
+      padding: 24px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .step {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      margin-bottom: 14px;
+      background: rgba(200,169,126,0.14);
+      color: var(--accent);
+      border: 1px solid rgba(200,169,126,0.22);
+      font-weight: 700;
+    }
+
+    .testimonial-card p {
+      margin-bottom: 18px;
+    }
+
+    .person {
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    /* CTA */
+    .cta-box {
+      padding: 34px;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at top left, rgba(200,169,126,0.22), transparent 35%),
+        linear-gradient(135deg, #1c1c1c, #121212);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 28px 0 40px;
+      color: var(--muted);
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    /* MODAL */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 80;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(900px, 100%);
+      border-radius: 24px;
+      overflow: hidden;
+      background: #141414;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 1fr 0.8fr;
+    }
+
+    .modal-visual {
+      min-height: 420px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.48)),
+        var(--modal-bg);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .modal-content {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-content .close {
+      align-self: flex-end;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--white);
+      cursor: pointer;
+    }
+
+    .modal-list {
+      padding-left: 18px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-grid,
+      .section-head,
+      .two-col,
+      .cta-box,
+      .modal-card {
+        grid-template-columns: 1fr;
+      }
+
+      .featured-grid .feature-card,
+      .gallery-item,
+      .gallery-item.large {
+        grid-column: span 6;
+      }
+
+      .process-grid,
+      .testimonial-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .section {
+        padding: 72px 0;
+      }
+
+      .nav-links {
+        position: absolute;
+        top: 79px;
+        left: 16px;
+        right: 16px;
+        display: none;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px;
+        border-radius: 20px;
+        background: rgba(17,17,17,0.96);
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .nav-links.open {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .featured-grid .feature-card,
+      .gallery-item,
+      .gallery-item.large {
+        grid-column: span 12;
+      }
+
+      .hero-photo {
+        min-height: 420px;
+      }
+
+      .cta-box {
+        padding: 28px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="nav-wrap">
+    <div class="container nav">
+      <a href="#top" class="brand">
+        <strong>Kasha</strong>
+        <span>Photography Portfolio</span>
+      </a>
 
-<h2>巴士到站提示器</h2>
+      <button class="menu-toggle" id="menuToggle" aria-label="開啟選單">☰</button>
 
-<!-- p1 -->
-<div class="container">
-    <input id="routeInput" placeholder="巴士號碼">
-    <select id="destinationSelect">
-        <option>請輸入路線</option>
-    </select>
-    <select id="stopSelect">
-        <option>請選擇車站</option>
-    </select>
-    <button onclick="addBus()">+</button>
-</div>
+      <div class="nav-links" id="navLinks">
+        <a href="#works">作品</a>
+        <a href="#gallery">分類</a>
+        <a href="#about">關於我</a>
+        <a href="#process">合作流程</a>
+        <a href="#contact">聯絡</a>
+      </div>
+    </div>
+  </div>
 
-<!-- p2 -->
-<div id="busList"></div>
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">Kasha Studio</div>
+          <h1>把光影，<br>變成值得收藏的故事。</h1>
+          <p>
+            Kasha 專注於帶有情緒與敘事感的攝影作品，擅長將人物、品牌與空間拍出層次與溫度。
+            網站採用高級雜誌風設計，適合展示你的代表作、建立個人風格，亦可直接用作接案作品集首頁。
+          </p>
 
-<script>
+          <div class="btn-group">
+            <a href="#gallery" class="btn btn-primary">瀏覽作品</a>
+            <a href="#contact" class="btn btn-secondary">預約拍攝</a>
+          </div>
 
-let buses=[];
-let debounceTimer;
-
-const routeInput=document.getElementById("routeInput");
-const destinationSelect=document.getElementById("destinationSelect");
-const stopSelect=document.getElementById("stopSelect");
-
-routeInput.addEventListener("input",()=>{
-    clearTimeout(debounceTimer);
-    debounceTimer=setTimeout(loadRoute,500);
-});
-
-destinationSelect.addEventListener("change",loadStops);
-
-/* ====== 載入路線 ====== */
-async function loadRoute(){
-    const route=routeInput.value.trim().toUpperCase();
-    if(!route) return;
-
-    destinationSelect.innerHTML="<option>載入中...</option>";
-    stopSelect.innerHTML="<option>請選擇車站</option>";
-
-    const res=await fetch("https://data.etabus.gov.hk/v1/transport/kmb/route/");
-    const data=await res.json();
-    const matched=data.data.filter(r=>r.route===route);
-
-    destinationSelect.innerHTML="";
-    matched.sort((a,b)=>parseInt(a.service_type)-parseInt(b.service_type));
-
-    matched.forEach(r=>{
-        let label=r.dest_tc;
-        if(r.service_type==="2") label+=" [特別班次]";
-        if(r.service_type==="3") label+=" [繁忙時間限定]";
-        if(parseInt(r.service_type)>=4) label+=" [特別服務]";
-
-        const opt=document.createElement("option");
-        opt.value=`${r.bound}|${r.service_type}|${r.dest_tc}`;
-        opt.textContent=label;
-        destinationSelect.appendChild(opt);
-    });
-
-    loadStops();
-}
-
-/* ====== 載入站 ====== */
-async function loadStops(){
-    const route=routeInput.value.trim().toUpperCase();
-    const val=destinationSelect.value;
-    if(!route||!val) return;
-
-    stopSelect.innerHTML="<option>載入站點...</option>";
-
-    const [bound,serviceType]=val.split("|");
-    const boundText=bound==="O"?"outbound":"inbound";
-
-    const res=await fetch(
-        `https://data.etabus.gov.hk/v1/transport/kmb/route-stop/${route}/${boundText}/${serviceType}`
-    );
-    const data=await res.json();
-
-    const stops=data.data.sort((a,b)=>a.seq-b.seq);
-
-    stopSelect.innerHTML="";
-    for(const s of stops){
-        const stopRes=await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/stop/${s.stop}`);
-        const stopData=await stopRes.json();
-        const opt=document.createElement("option");
-        opt.value=`${s.stop}|${serviceType}`;
-        opt.textContent=stopData.data.name_tc;
-        stopSelect.appendChild(opt);
-    }
-}
-
-/* ====== 新增 ====== */
-function addBus(){
-    const route=routeInput.value.trim().toUpperCase();
-    const destVal=destinationSelect.value;
-    const stopVal=stopSelect.value;
-    if(!route||!destVal||!stopVal) return alert("請選擇完整資料");
-
-    const [stopId,serviceType]=stopVal.split("|");
-    const stopName=stopSelect.options[stopSelect.selectedIndex].text;
-
-    buses.push({route,stopId,serviceType,stopName});
-    render();
-}
-
-/* ====== ETA ====== */
-async function fetchETA(stop,route,serviceType){
-    const res=await fetch(
-        `https://data.etabus.gov.hk/v1/transport/kmb/eta/${stop}/${route}/${serviceType}`
-    );
-    const data=await res.json();
-    return data.data.slice(0,2);
-}
-
-function getMinutes(eta){
-    const now=new Date();
-    return Math.max(0,Math.round((new Date(eta)-now)/60000));
-}
-
-function getStatus(min){
-    if(min<=1) return ["唔好玩電話😡","red flash"];
-    if(min<=4) return ["準備上車","orange"];
-    if(min<=9) return ["可以慢慢行","green"];
-    return ["仲有排等","black"];
-}
-
-/* ====== Render ====== */
-async function render(){
-    const list=document.getElementById("busList");
-    list.innerHTML="";
-
-    for(let i=0;i<buses.length;i++){
-        const b=buses[i];
-        const etaData=await fetchETA(b.stopId,b.route,b.serviceType);
-
-        let first="--",second="--",msg="暫時無班次",cls="black";
-
-        if(etaData.length>0){
-            const m1=getMinutes(etaData[0].eta);
-            first=m1+" 分鐘";
-            [msg,cls]=getStatus(m1);
-
-            if(etaData.length>1){
-                const m2=getMinutes(etaData[1].eta);
-                second=m2+" 分鐘";
-            }
-        }
-
-        const card=document.createElement("div");
-        card.className="card";
-        card.innerHTML=`
-            <div class="route-box">${b.route}</div>
-            <div>
-                <div class="eta-main ${cls}">${first}</div>
-                <div class="eta-sub">${second}</div>
+          <div class="stats">
+            <div class="stat">
+              <strong>120+</strong>
+              <span>完成拍攝企劃</span>
             </div>
-            <div class="stop-name">${b.stopName}</div>
-            <div class="message ${cls}">${msg}</div>
-            <div class="delete-indicator">刪除</div>
-        `;
+            <div class="stat">
+              <strong>4</strong>
+              <span>主要攝影風格分類</span>
+            </div>
+            <div class="stat">
+              <strong>1:1</strong>
+              <span>客製化創作溝通</span>
+            </div>
+          </div>
+        </div>
 
-        enableSwipe(card,i);
-        list.appendChild(card);
+        <div class="hero-card">
+          <div class="hero-photo">
+            <div class="photo-badge">
+              <strong>Editorial Mood</strong>
+              <span>極簡 / 故事感 / 情緒光影</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="works">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Featured Works</div>
+            <h2>精選系列</h2>
+          </div>
+          <p>
+            呢一版我幫你預設成偏電影感與品牌感的攝影網站，作品展示有主次層級，
+            首屏夠吸引，之後再用分類畫廊帶出你的完整風格。
+          </p>
+        </div>
+
+        <div class="featured-grid">
+          <article class="feature-card" style="--bg-image:
+            radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 22%),
+            linear-gradient(135deg, #7a6757, #1c1c1c 65%);">
+            <div class="feature-visual"></div>
+            <div class="feature-info">
+              <div class="tag">Portrait Series</div>
+              <h3>Silent Frames</h3>
+              <p>人物情緒、人像層次、柔和陰影與留白構圖。</p>
+            </div>
+          </article>
+
+          <article class="feature-card" style="--bg-image:
+            radial-gradient(circle at 78% 18%, rgba(200,169,126,0.24), transparent 28%),
+            linear-gradient(160deg, #5a4c40, #111111 70%);">
+            <div class="feature-visual"></div>
+            <div class="feature-info">
+              <div class="tag">Brand Story</div>
+              <h3>Light & Identity</h3>
+              <p>適合品牌形象、形象照、產品與空間氛圍拍攝。</p>
+            </div>
+          </article>
+
+          <article class="feature-card" style="--bg-image:
+            radial-gradient(circle at 25% 70%, rgba(255,255,255,0.12), transparent 24%),
+            linear-gradient(145deg, #3d342d, #0f0f0f 70%);">
+            <div class="feature-visual"></div>
+            <div class="feature-info">
+              <div class="tag">Street Mood</div>
+              <h3>City Notes</h3>
+              <p>街頭感、夜色、移動中的瞬間與故事節奏。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="gallery">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Curated Gallery</div>
+            <h2>作品分類畫廊</h2>
+          </div>
+          <p>
+            下面已經幫你做好分類切換。你之後只要將每張作品卡改成自己的照片或作品名稱，
+            呢個網站就可以直接變成正式 Portfolio。
+          </p>
+        </div>
+
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all">全部</button>
+          <button class="filter-btn" data-filter="portrait">人像</button>
+          <button class="filter-btn" data-filter="brand">品牌</button>
+          <button class="filter-btn" data-filter="street">街拍</button>
+          <button class="filter-btn" data-filter="editorial">Editorial</button>
+        </div>
+
+        <div class="gallery-grid">
+          <article class="gallery-item large" data-category="portrait"
+            data-title="No.01 柔光人像"
+            data-type="Portrait"
+            data-desc="以柔和側光與低飽和色調，呈現人物最自然的情緒與層次。"
+            style="--bg-image:
+            radial-gradient(circle at 22% 22%, rgba(255,255,255,0.18), transparent 18%),
+            linear-gradient(135deg, #8d7763, #181818 72%);">
+            <div class="gallery-bg"></div>
+            <div class="gallery-meta">
+              <div>
+                <h3>No.01 柔光人像</h3>
+                <span>Portrait</span>
+              </div>
+              <div class="plus">+</div>
+            </div>
+          </article>
+
+          <article class="gallery-item" data-category="brand"
+            data-title="No.02 品牌形象"
+            data-type="Brand"
+            data-desc="聚焦品牌質感、色調一致性與畫面留白，適合社交媒體與官網展示。"
+            style="--bg-image:
+            radial-gradient(circle at 70% 18%, rgba(200,169,126,0.24), transparent 22%),
+            linear-gradient(155deg, #615344, #111111 74%);">
+            <div class="gallery-bg"></div>
+            <div class="gallery-meta">
+              <div>
+                <h3>No.02 品牌形象</h3>
+                <span>Brand</span>
+              </div>
+              <div class="plus">+</div>
+            </div>
+          </article>
+
+          <article class="gallery-item" data-category="street"
+            data-title="No.03 夜色街拍"
+            data-type="Street"
+            data-desc="用城市燈光、反射與節奏，捕捉移動中的故事片段。"
+            style="--bg-image:
+            radial-gradient(circle at 30% 75%, rgba(255,255,255,0.08), transparent 20%),
+            linear-gradient(145deg, #42392f, #0d0d0d 76%);">
+            <div class="gallery-bg"></div>
+            <div class="gallery-meta">
+              <div>
+                <h3>No.03 夜色街拍</h3>
+                <span>Street</span>
+              </div>
+              <div class="plus">+</div>
+            </div>
+          </article>
+
+          <article class="gallery-item" data-category="editorial"
+            data-title="No.04 雜誌感構圖"
+            data-type="Editorial"
+            data-desc="透過對稱、留白與版面感，打造更強烈的高級視覺印象。"
+            style="--bg-image:
+            radial-gradient(circle at 78% 24%, rgba(255,255,255,0.14), transparent 24%),
+            linear-gradient(135deg, #7b6853, #171717 78%);">
+            <div class="gallery-bg"></div>
+            <div class="gallery-meta">
+              <div>
+                <h3>No.04 雜誌感構圖</h3>
+                <span>Editorial</span>
+              </div>
+              <div class="plus">+</div>
+            </div>
+          </article>
+
+          <article class="gallery-item large" data-category="brand"
+            data-title="No.05 空間與品牌"
+            data-type="Brand"
+            data-desc="結合空間線條與品牌色系，讓作品更適合商業展示與提案。"
+            style="--bg-image:
+            radial-gradient(circle at 16% 20%, rgba(255,255,255,0.12), transparent 20%),
+            linear-gradient(160deg, #544739, #121212 74%);">
+            <div class="gallery-bg"></div>
+            <div class="gallery-meta">
+              <div>
+                <h3>No.05 空間與品牌</h3>
+                <span>Brand</span>
+              </div>
+              <div class="plus">+</div>
+            </div>
+          </article>
+
+          <article class="gallery-item" data-category="portrait"
+            data-title="No.06 自然神情"
+            data-type="Portrait"
+            data-desc="重視人物互動與表情節奏，拍出不刻意但耐看的作品。"
+            style="--bg-image:
+            radial-gradient(circle at 75% 18%, rgba(200,169,126,0.2), transparent 20%),
+            linear-gradient(145deg, #806d59, #161616 76%);">
+            <div class="gallery-bg"></div>
+            <div class="gallery-meta">
+              <div>
+                <h3>No.06 自然神情</h3>
+                <span>Portrait</span>
+              </div>
+              <div class="plus">+</div>
+            </div>
+          </article>
+
+          <article class="gallery-item" data-category="editorial"
+            data-title="No.07 幾何留白"
+            data-type="Editorial"
+            data-desc="用幾何構圖與克制色彩，營造精品雜誌式的完成度。"
+            style="--bg-image:
+            radial-gradient(circle at 28% 22%, rgba(255,255,255,0.1), transparent 18%),
+            linear-gradient(135deg, #665543, #101010 76%);">
+            <div class="gallery-bg"></div>
+            <div class="gallery-meta">
+              <div>
+                <h3>No.07 幾何留白</h3>
+                <span>Editorial</span>
+              </div>
+              <div class="plus">+</div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="container two-col">
+        <div class="panel signature-box">
+          <div>
+            <div class="eyebrow">About Kasha</div>
+            <h2>攝影不只是記錄，<br>而是重新定義氣氛。</h2>
+          </div>
+          <p class="quote">“ 我希望每一張照片，不止好看，而係有停留感。 ”</p>
+          <p class="mini">你可以將呢度改成你的自我介紹、拍攝理念、合作城市或服務對象。</p>
+        </div>
+
+        <div class="panel">
+          <h3>關於我</h3>
+          <p style="margin-bottom: 18px;">
+            我擅長以簡潔畫面、自然光影與情緒引導，為個人、品牌與創作者拍出有辨識度的作品。
+            不論是形象照、品牌攝影、Editorial、生活感街拍，我都重視每一張照片背後的情緒一致性。
+          </p>
+          <p style="margin-bottom: 18px;">
+            呢個網站設計特別適合攝影師、自媒體創作者、視覺導演、個人品牌使用。
+            若你之後有真實作品，我可以再幫你直接換成圖片版、加 Lightbox、加更多分類頁。
+          </p>
+          <div class="btn-group">
+            <a href="#contact" class="btn btn-primary">洽談合作</a>
+            <a href="#process" class="btn btn-secondary">查看流程</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="process">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">How It Works</div>
+            <h2>合作流程</h2>
+          </div>
+          <p>
+            呢個區塊好適合用來建立專業感。讓客戶一眼知道由洽談到交付作品的步驟，
+            可以提升信任感同埋預約轉換率。
+          </p>
+        </div>
+
+        <div class="process-grid">
+          <div class="process-card">
+            <div class="step">01</div>
+            <h3>需求溝通</h3>
+            <p>了解拍攝用途、風格參考、地點、服裝與想呈現的氣氛。</p>
+          </div>
+          <div class="process-card">
+            <div class="step">02</div>
+            <h3>拍攝執行</h3>
+            <p>依照主題規劃光線、鏡頭節奏與畫面情緒，完成正式拍攝。</p>
+          </div>
+          <div class="process-card">
+            <div class="step">03</div>
+            <h3>精修交付</h3>
+            <p>整理與精修作品，按用途輸出適合 IG、網站或品牌提案的版本。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Testimonials</div>
+            <h2>客戶評語</h2>
+          </div>
+          <p>
+            如果你未有真實評價，現階段可以先保留呢個版位。之後有客戶回饋，我可以幫你再換成真實內容。
+          </p>
+        </div>
+
+        <div class="testimonial-grid">
+          <div class="testimonial-card">
+            <p>“ 成品比想像中更有氣氛，網站同照片整體風格非常一致，品牌感好強。 ”</p>
+            <div class="person">Mira / 個人品牌創作者</div>
+          </div>
+          <div class="testimonial-card">
+            <p>“ 溝通清楚、拍攝節奏舒服，成品很適合放官網與社交媒體。 ”</p>
+            <div class="person">Aster / 選物店主理人</div>
+          </div>
+          <div class="testimonial-card">
+            <p>“ 最鍾意佢處理光影同情緒嘅方式，照片有故事感，不會只係普通打卡照。 ”</p>
+            <div class="person">Luna / 形象照客戶</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="container">
+        <div class="cta-box">
+          <div>
+            <div class="eyebrow">Contact</div>
+            <h2>準備好開始你的下一組作品？</h2>
+            <p>
+              你可以將這裡改成 Email、Instagram、WhatsApp 或 Google Form 連結。
+              如果你想，我下一步可以直接幫你加聯絡表單版本。
+            </p>
+          </div>
+          <div class="btn-group">
+            <a href="mailto:hello@kasha.com" class="btn btn-primary">Email Kasha</a>
+            <a href="#" class="btn btn-secondary">Instagram</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <div>© 2026 Kasha Photography. All rights reserved.</div>
+      <div>Portfolio / Brand / Editorial / Portrait</div>
+    </div>
+  </footer>
+
+  <div class="modal" id="workModal">
+    <div class="modal-card">
+      <div class="modal-visual" id="modalVisual"></div>
+      <div class="modal-content">
+        <button class="close" id="closeModal" aria-label="關閉">✕</button>
+        <div class="tag" id="modalType">Portrait</div>
+        <h3 id="modalTitle">作品標題</h3>
+        <p id="modalDesc">作品描述</p>
+        <ul class="modal-list">
+          <li>可改成真實作品說明</li>
+          <li>可加入拍攝年份 / 地點 / 品牌名稱</li>
+          <li>之後也可以升級成圖片 Lightbox</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => navLinks.classList.remove('open'));
+    });
+
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const galleryItems = document.querySelectorAll('.gallery-item');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        const filter = button.dataset.filter;
+
+        galleryItems.forEach(item => {
+          if (filter === 'all' || item.dataset.category === filter) {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    const modal = document.getElementById('workModal');
+    const closeModal = document.getElementById('closeModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalType = document.getElementById('modalType');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalVisual = document.getElementById('modalVisual');
+
+    galleryItems.forEach(item => {
+      item.addEventListener('click', () => {
+        modalTitle.textContent = item.dataset.title;
+        modalType.textContent = item.dataset.type;
+        modalDesc.textContent = item.dataset.desc;
+        modalVisual.style.setProperty('--modal-bg', getComputedStyle(item).getPropertyValue('--bg-image'));
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
+    closeModal.addEventListener('click', closeWorkModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeWorkModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeWorkModal();
+    });
+
+    function closeWorkModal() {
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
     }
-}
-
-function enableSwipe(card,index){
-    let startX=0,currentX=0;
-
-    card.addEventListener("touchstart",e=>{
-        startX=e.touches[0].clientX;
-    });
-
-    card.addEventListener("touchmove",e=>{
-        currentX=e.touches[0].clientX;
-        if(currentX-startX<-50){
-            card.style.transform="translateX(-80px)";
-        }
-    });
-
-    card.addEventListener("touchend",()=>{
-        if(currentX-startX<-100){
-            buses.splice(index,1);
-            render();
-        }else{
-            card.style.transform="translateX(0)";
-        }
-    });
-}
-
-setInterval(render,30000);
-
-</script>
+  </script>
 </body>
 </html>
